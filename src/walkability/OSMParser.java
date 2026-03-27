@@ -24,6 +24,13 @@ public class OSMParser {
         // wayNodeRefs will store the "ways" from the OSM file i.e. sequences of nodes
         List<Long> wayNodeRefs = null;
 
+        // Temporary variables for parsing nodes
+        long currentNodeId = -1;
+        double currentLat = 0.0;
+        double currentLon = 0.0;
+        boolean insideNode = false;
+        Map<String, String> currentNodeTags = new HashMap<>();
+
         /* Will track if the current way is a road as ways can be other structures
         too, such as buildings or parks */
         boolean isRoad = false;
@@ -36,20 +43,18 @@ public class OSMParser {
                 // Gets the name of the element
                 String elementName = reader.getLocalName();
 
-                // PARSING NODES
+                // PARSING NODES - collect id, lat, lon but wait for tags before creating node
                 if (elementName.equals("node")) {
-                    // Parsing the tag values to the variables of a Node
-                    long id = Long.parseLong(reader.getAttributeValue(null, "id"));
-                    double latitude = Double.parseDouble(reader.getAttributeValue(null, "lat"));
-                    double longitude = Double.parseDouble(reader.getAttributeValue(null, "lon"));
-
-                    Node node = new Node(id, latitude, longitude, NodeType.ROAD_NODE);
-                    osmNodes.put(id, node);
-                    graph.addNode(node);
+                    currentNodeId = Long.parseLong(reader.getAttributeValue(null, "id"));
+                    currentLat = Double.parseDouble(reader.getAttributeValue(null, "lat"));
+                    currentLon = Double.parseDouble(reader.getAttributeValue(null, "lon"));
+                    insideNode = true;
+                    currentNodeTags.clear();
                 }
 
                 // PARSING WAYS
                 else if (elementName.equals("way")) {
+                    insideNode = false; // we are no longer inside a node
                     wayNodeRefs = new ArrayList<>();
                     // isRoad is false until proven otherwise
                     isRoad = false;
@@ -61,13 +66,19 @@ public class OSMParser {
                     wayNodeRefs.add(ref);
                 }
 
-                // PARSING TAGS
-                else if (elementName.equals("tag") && wayNodeRefs != null) {
+                // PARSING TAGS - handles both node tags and way tags
+                else if (elementName.equals("tag")) {
                     String k = reader.getAttributeValue(null, "k");
                     String v = reader.getAttributeValue(null, "v");
 
-                    if ("highway".equals(k)) {
-                        isRoad = true;
+                    if (insideNode) {
+                        // Collect tags for the current node to determine its type later
+                        currentNodeTags.put(k, v);
+                    } else if (wayNodeRefs != null) {
+                        // Way tag - check if it is a road
+                        if ("highway".equals(k)) {
+                            isRoad = true;
+                        }
                     }
                 }
             }
@@ -76,8 +87,17 @@ public class OSMParser {
             else if (event == XMLStreamConstants.END_ELEMENT) {
                 String elementName = reader.getLocalName();
 
+                // When node element closes we now know all its tags so we can create it
+                if (elementName.equals("node") && insideNode) {
+                    NodeType type = determineNodeType(currentNodeTags);
+                    Node node = new Node(currentNodeId, currentLat, currentLon, type);
+                    osmNodes.put(currentNodeId, node);
+                    graph.addNode(node);
+                    insideNode = false;
+                }
+
                 // when the parser reaches </way> it knows that the current way is complete
-                if (elementName.equals("way") && wayNodeRefs != null) {
+                else if (elementName.equals("way") && wayNodeRefs != null) {
                     // if the way is a road it connects the consecutive nodes
                     if (isRoad) {
                         for (int i = 0; i < wayNodeRefs.size() - 1; i++) {
@@ -122,5 +142,48 @@ public class OSMParser {
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
+    }
+
+    /* determineNodeType reads the tags collected from a node element
+    and returns the appropriate NodeType based on OSM tag values */
+    private NodeType determineNodeType(Map<String, String> tags) {
+        String amenity = tags.get("amenity");
+        String highway = tags.get("highway");
+        String railway = tags.get("railway");
+        String shop    = tags.get("shop");
+        String leisure = tags.get("leisure");
+        String landuse = tags.get("landuse");
+
+        // Checking TRANSIT
+        if ("bus_stop".equals(amenity) ||
+                "bus_stop".equals(highway) ||
+                "ferry_terminal".equals(amenity) ||
+                "station".equals(railway) ||
+                "tram_stop".equals(railway)) {
+            return NodeType.TRANSIT;
+        }
+
+        // Checking SHOP
+        if ("marketplace".equals(amenity) ||
+                "restaurant".equals(amenity) ||
+                "cafe".equals(amenity) ||
+                "fast_food".equals(amenity) ||
+                "pharmacy".equals(amenity) ||
+                "bank".equals(amenity) ||
+                "supermarket".equals(shop) ||
+                "convenience".equals(shop)) {
+            return NodeType.SHOP;
+        }
+
+        // Checking PARK
+        if ("park".equals(leisure) ||
+                "playground".equals(leisure) ||
+                "garden".equals(leisure) ||
+                "park".equals(amenity) ||
+                "recreation_ground".equals(landuse)) {
+            return NodeType.PARK;
+        }
+
+        return NodeType.ROAD_NODE;
     }
 }

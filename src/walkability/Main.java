@@ -5,6 +5,7 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
+
         /*try {
             String filePath = "data/city.osm";
 
@@ -64,6 +65,7 @@ public class Main {
             e.printStackTrace();
         }*/
 
+        /*
         try {
             String filePath = "data/city.osm";
 
@@ -133,5 +135,7 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+         */
     }
 }
