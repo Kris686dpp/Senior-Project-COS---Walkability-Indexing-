@@ -4,45 +4,47 @@ import java.util.*;
 
 public class WalkabilityAnalyzer {
 
-    // 15 minute walking distance, calculated as 15 mins * 80 m/min
-    private static final double MAX_WALKING_DISTANCE = 1200.0;
+    public static double computeAverageDistance(Graph graph, boolean useFloydWarshall) {
 
-    private static final double WEIGHT_TRANSIT = 0.3;
-    private static final double WEIGHT_SHOP = 0.5;
-    private static final double WEIGHT_PARK = 0.2;
+        List<Node> nodes = new ArrayList<>(graph.getAllNodes());
+        int n = nodes.size();
 
-    private static final double WEIGHT_AMENITY = 0.7;
-    private static final double WEIGHT_CONNECTIVITY = 0.3;
-
-    // Separates the road and amenity nodes from each other
-
-
-    private static double computeAmenityScore(Graph graph, boolean useFloydWarshall) {
-        List<Node> roadNodes = new ArrayList<>();
-        List<Node> amenityNodes = new ArrayList<>();
-
-        for (Node node : graph.getAllNodes()) {
-            if (node.getType() == NodeType.ROAD_NODE) {
-                roadNodes.add(node);
-            } else {
-                amenityNodes.add(node);
-            }
+        if (n == 0) {
+            throw new IllegalArgumentException("Graph is empty.");
         }
 
-        double totalScore = 0.0;
+        double totalDistance = 0.0;
+        int reachablePairs = 0;
 
         if (useFloydWarshall) {
-            List<Node> allNodes = new ArrayList<>(graph.getAllNodes());
-            Map<Node, Integer> indexMap = new HashMap<>();
-            for (int i = 0; i < allNodes.size(); i++) {
-                indexMap.put(allNodes.get(i), i);
+            FloydWarshall.Result result = FloydWarshall.computeAllPairs(graph);
+            double[][] dist = result.dist;
+
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (i != j && dist[i][j] != Double.POSITIVE_INFINITY) {
+                        totalDistance += dist[i][j];
+                        reachablePairs++;
+                    }
+                }
+            }
+
+        } else {
+            for (Node source : nodes) {
+                Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, source);
+                for (Map.Entry<Node, Double> entry : distances.entrySet()) {
+                    if (entry.getKey() != source && entry.getValue() != Double.POSITIVE_INFINITY) {
+                        totalDistance += entry.getValue();
+                        reachablePairs++;
+                    }
+                }
             }
         }
 
+        if (reachablePairs == 0) {
+            throw new IllegalStateException("No reachable node pairs found in graph.");
+        }
+
+        return totalDistance / reachablePairs;
     }
-
-
-
-
-
 }

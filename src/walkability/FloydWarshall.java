@@ -4,7 +4,17 @@ import java.util.*;
 
 public class FloydWarshall {
 
-    public static double[][] computeAllPairs(Graph graph) {
+    public static class Result {
+        public final double[][] dist;
+        public final Map<Node, Integer> indexMap;
+
+        public Result(double[][] dist, Map<Node, Integer> indexMap) {
+            this.dist = dist;
+            this.indexMap = indexMap;
+        }
+    }
+
+    public static Result computeAllPairs(Graph graph) {
 
         List<Node> nodeList = new ArrayList<>(graph.getAllNodes()); // An array list is easier to work with
         int n = nodeList.size(); // Total number of nodes
@@ -50,6 +60,6 @@ public class FloydWarshall {
             }
         }
 
-        return dist;
+        return new Result(dist, indexMap);
     }
 }
