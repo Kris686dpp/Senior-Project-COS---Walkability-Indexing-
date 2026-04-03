@@ -67,8 +67,8 @@ public class WalkabilityTest {
     public void testDijkstraMulti() {
         Graph graph = new Graph();
         Node a = new Node(1, 42.0, 23.0, NodeType.ROAD_NODE);
-        Node b = new Node(1, 42.1, 23.1, NodeType.ROAD_NODE);
-        Node c = new Node(1, 42.2, 23.2, NodeType.ROAD_NODE);
+        Node b = new Node(2, 42.1, 23.1, NodeType.ROAD_NODE);
+        Node c = new Node(3, 42.2, 23.2, NodeType.ROAD_NODE);
         graph.addNode(a);
         graph.addNode(b);
         graph.addNode(c);
@@ -76,7 +76,7 @@ public class WalkabilityTest {
         graph.addEdge(b, c, 20.0);
 
         Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, a);
-        assertEquals("a to c by b should be 30.0", 30, distances.get(c), 0.002);
+        assertEquals("a to c by b should be 30.0", 30, distances.get(c), 0.001);
     }
 
     @Test
