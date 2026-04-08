@@ -1,6 +1,8 @@
 import org.junit.Test;
 import static org.junit.Assert.*;
 import walkability.*;
+
+import java.util.List;
 import java.util.Map;
 
 public class WalkabilityTest {
@@ -47,6 +49,23 @@ public class WalkabilityTest {
         graph.addNode(a);
 
         assertEquals("Isolated nodes should not retrun an edge", 0, graph.getEdges(a).size());
+    }
+
+    @Test
+    public void testGetAllEdges(){
+        Graph graph = new Graph();
+        Node a = new Node(1,42.0, 23.0, NodeType.ROAD_NODE);
+        Node b = new Node(2,42.1, 23.1, NodeType.ROAD_NODE);
+        Node c = new Node(3,42.2, 23.2, NodeType.ROAD_NODE);
+        graph.addNode(a);
+        graph.addNode(b);
+        graph.addNode(c);
+        graph.addEdge(a, b, 100);
+        graph.addEdge(a, c, 100);
+        graph.addEdge(c, b, 100);
+        List<Edge> allEdges = graph.getAllEdges();
+
+        assertEquals("The graph should have 6 edges in total (3 edges * 2 reverse edges)", 6, allEdges.size());
     }
 
     // TESTING ALGORITHMS

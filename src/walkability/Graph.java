@@ -31,5 +31,14 @@ public class Graph {
     public Collection<Node> getAllNodes() {
         return nodes.values();
     }
+
+    public List<Edge> getAllEdges() {
+        List<Edge> allEdges = new ArrayList<>();
+        for(List<Edge> edges : adjacencyList.values()){
+            allEdges.addAll(edges);
+        }
+        return allEdges;
+    }
+
 }
 
