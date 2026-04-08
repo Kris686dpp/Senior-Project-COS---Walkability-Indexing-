@@ -2,11 +2,24 @@ package walkability;
 
 import java.util.Map;
 import java.util.Scanner;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
-public class Main {
+public class Main extends Application{
 
     public static void main(String[] args) {
-
+        launch(args);
         System.out.println("Average Distance Test");
 
         try {
@@ -22,7 +35,7 @@ public class Main {
             System.out.println("Which algorithm would you like to use?");
             System.out.println("1 - Dijkstra");
             System.out.println("2 - Floyd-Warshall");
-            System.out.println("3 - Jhonson's Algorithm");
+            System.out.println("3 - Johnson's Algorithm");
             System.out.print("Enter choice: ");
             int choice = scanner.nextInt();
             String algorithm;
@@ -49,5 +62,15 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+
+        Group root = new Group();
+        Scene scene = new Scene(root, 600,600);
+        Stage stage = new Stage();
+
+        stage.setScene(scene);
+        stage.show();
     }
 }
