@@ -24,11 +24,15 @@ public class BellmanFord {
         // Have the distance from the source to itself be zero
         dist.put(source, 0.0);
 
-        // Step 2: relax edges repeatedly
+        // Step 2: Relax the edges repeatedly
         for (int i = 1; i < n; i++){
-
+            for(Edge edge : graph.getAllEdges()){
+                double distance = dist.get(edge.getFrom()) + edge.getDistance();
+                if (distance < dist.get(edge.getTo())) {
+                    dist.put(edge.getTo(), distance);
+                }
+            }
         }
-
 
         return dist;
     }

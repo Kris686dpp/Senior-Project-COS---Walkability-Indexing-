@@ -48,7 +48,7 @@ public class WalkabilityTest {
         Node a = new Node(1, 42.0, 23.0, NodeType.TRANSIT);
         graph.addNode(a);
 
-        assertEquals("Isolated nodes should not retrun an edge", 0, graph.getEdges(a).size());
+        assertEquals("Isolated nodes should not return an edge", 0, graph.getEdges(a).size());
     }
 
     @Test
@@ -69,6 +69,8 @@ public class WalkabilityTest {
     }
 
     // TESTING ALGORITHMS
+
+    // TESTING DIJKSTRA
     @Test
     public void testDijkstraDirectEdge() {
         Graph graph = new Graph();
@@ -97,6 +99,8 @@ public class WalkabilityTest {
         Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, a);
         assertEquals("a to c by b should be 30.0", 30, distances.get(c), 0.001);
     }
+
+    // TESTING FLOYD-WARSHALL
 
     @Test
     public void testFloydWarshallDirectEdge() {
@@ -131,6 +135,22 @@ public class WalkabilityTest {
         double[][] dist = result.dist;
         assertEquals("A to C by B should be 30.0", 30.0, dist[0][2], 0.001);
         assertEquals("C to  A by B should be 30.0", 30.0, dist[2][0], 0.001);
+    }
+
+    @Test
+    public void testBellmanFordMulti() {
+        Graph graph = new Graph();
+        Node a = new Node(1, 42.0, 23.0, NodeType.ROAD_NODE);
+        Node b = new Node(2, 42.1, 23.1, NodeType.ROAD_NODE);
+        Node c = new Node(3, 42.2, 23.2, NodeType.ROAD_NODE);
+        graph.addNode(a);
+        graph.addNode(b);
+        graph.addNode(c);
+        graph.addEdge(a, b, 10.0);
+        graph.addEdge(b, c, 20.0);
+
+        Map<Node, Double> distances = BellmanFord.computeShortestPath(graph, a);
+        assertEquals("a to c by b should be 30.0", 30, distances.get(c), 0.001);
     }
 
 }
