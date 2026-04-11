@@ -78,15 +78,13 @@ public class WalkabilityAnalyzer {
         double centerLat = totalLat / nodes.size();
         double centerLon = totalLon / nodes.size();
 
-        double maxDist = 0.0;
+        List<Double> dist = new ArrayList<>();
         for (Node node : nodes){
-            double dist = Utilities.haversine(centerLat, centerLon, node.getLatitude(), node.getLongitude());
-            if (dist > maxDist){
-                maxDist = dist;
+            dist.add(Utilities.haversine(centerLat, centerLon, node.getLatitude(), node.getLongitude()));
             }
-        }
 
-        return maxDist;
-
+        Collections.sort(dist);
+        int index = (int) Math.ceil(0.95 * dist.size()) - 1;
+        return dist.get(index);
     }
 }

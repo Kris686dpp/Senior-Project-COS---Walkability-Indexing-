@@ -63,6 +63,10 @@ public class Main extends Application{
 
             System.out.println("The radius of the graph is: " + radius + " meters");
 
+            System.out.println("it is working");
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
