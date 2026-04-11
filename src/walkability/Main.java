@@ -59,6 +59,10 @@ public class Main extends Application{
             System.out.println("Average distance between all reachable nodes: "
                     + avgDistance + " meters");
 
+            double radius = WalkabilityAnalyzer.computeRadius(graph.getAllNodes());
+
+            System.out.println("The radius of the graph is: " + radius + " meters");
+
         } catch (Exception e) {
             e.printStackTrace();
         }

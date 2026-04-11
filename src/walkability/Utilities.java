@@ -4,7 +4,7 @@ public class Utilities {
     /* The haversine function calculates the distance between two Nodes
     given only the longitude and latitude and gives back
     the result in meters. It is done using the Haversine Formula */
-    static double haversine(double lat1, double lon1, double lat2, double lon2) {
+    public static double haversine(double lat1, double lon1, double lat2, double lon2) {
         double R = 6371000; // radius of Earth in meters
 
         double dLat = Math.toRadians(lat2 - lat1);

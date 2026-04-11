@@ -28,8 +28,8 @@ public class Graph {
         return adjacencyList.getOrDefault(node, new ArrayList<>());
     }
 
-    public Collection<Node> getAllNodes() {
-        return nodes.values();
+    public List<Node> getAllNodes() {
+        return new ArrayList<>(nodes.values());
     }
 
     public List<Edge> getAllEdges() {

@@ -66,4 +66,27 @@ public class WalkabilityAnalyzer {
         }
 
         return totalDistance / reachablePairs;
-    } }
+    }
+
+    public static double computeRadius(List <Node> nodes){
+        double totalLat = 0.0;
+        double totalLon = 0.0;
+        for (Node node : nodes){
+            totalLat += node.getLatitude();
+            totalLon += node.getLongitude();
+        }
+        double centerLat = totalLat / nodes.size();
+        double centerLon = totalLon / nodes.size();
+
+        double maxDist = 0.0;
+        for (Node node : nodes){
+            double dist = Utilities.haversine(centerLat, centerLon, node.getLatitude(), node.getLongitude());
+            if (dist > maxDist){
+                maxDist = dist;
+            }
+        }
+
+        return maxDist;
+
+    }
+}

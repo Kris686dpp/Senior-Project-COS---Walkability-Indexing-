@@ -153,4 +153,9 @@ public class WalkabilityTest {
         assertEquals("a to c by b should be 30.0", 30, distances.get(c), 0.001);
     }
 
+    @Test
+    public void testComputeRadius(){
+
+    }
+
 }
