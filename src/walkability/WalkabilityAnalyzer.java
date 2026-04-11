@@ -11,8 +11,14 @@ public class WalkabilityAnalyzer {
 
         if (n == 0) throw new IllegalArgumentException("Graph is empty.");
 
+        // For timing the algorithms
+        long startTime = System.currentTimeMillis();
+
+        // For calculating the average: dividing the total distance by the number of all reachable nodes
         double totalDistance = 0.0;
         int reachablePairs = 0;
+
+        // Computing average distance for FLOYD-WARSHALL
 
         if (algorithm.equals("floyd-warshall")) {
             FloydWarshall.Result result = FloydWarshall.computeAllPairs(graph);
@@ -27,6 +33,8 @@ public class WalkabilityAnalyzer {
                 }
             }
 
+        // Computing average distance for BELLMAN-FORD
+
         } else if (algorithm.equals("bellman-ford")) {
             for (Node source : nodes) {
                 Map<Node, Double> distances = BellmanFord.computeShortestPath(graph, source);
@@ -38,7 +46,7 @@ public class WalkabilityAnalyzer {
                 }
             }
         } else {
-            // Default to Dijkstra
+            // Default to DIJKSTRA
             for (Node source : nodes) {
                 Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, source);
                 for (Map.Entry<Node, Double> entry : distances.entrySet()) {
@@ -49,6 +57,9 @@ public class WalkabilityAnalyzer {
                 }
             }
         }
+
+        long timeTaken = System.currentTimeMillis() - startTime;
+        System.out.println("Time taken: " + (String.format("%.2f", timeTaken / 1000.0) + "s"));
 
         if (reachablePairs == 0) {
             throw new IllegalStateException("No reachable node pairs found in graph.");
