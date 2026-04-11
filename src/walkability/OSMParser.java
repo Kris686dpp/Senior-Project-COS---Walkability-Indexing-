@@ -105,7 +105,7 @@ public class OSMParser {
                             Node to = osmNodes.get(wayNodeRefs.get(i + 1));
 
                             if (from != null && to != null) {
-                                double distance = haversine(
+                                double distance = Utilities.haversine(
                                         from.getLatitude(), from.getLongitude(),
                                         to.getLatitude(), to.getLongitude()
                                 );
