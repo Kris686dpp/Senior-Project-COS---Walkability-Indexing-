@@ -27,19 +27,16 @@ public class WalkabilityAnalyzer {
                 }
             }
 
-        } else if (algorithm.equals("Johnson")) {
-            Johnson.Result result = Johnson.computeAllPairs(graph);
-            double[][] dist = result.dist;
-
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    if (i != j && dist[i][j] != Double.POSITIVE_INFINITY) {
-                        totalDistance += dist[i][j];
+        } else if (algorithm.equals("bellman-ford")) {
+            for (Node source : nodes) {
+                Map<Node, Double> distances = BellmanFord.computeShortestPath(graph, source);
+                for (Map.Entry<Node, Double> entry : distances.entrySet()) {
+                    if (entry.getKey() != source && entry.getValue() != Double.POSITIVE_INFINITY) {
+                        totalDistance += entry.getValue();
                         reachablePairs++;
                     }
                 }
             }
-
         } else {
             // Default to Dijkstra
             for (Node source : nodes) {

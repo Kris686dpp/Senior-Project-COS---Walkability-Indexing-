@@ -35,7 +35,7 @@ public class Main extends Application{
             System.out.println("Which algorithm would you like to use?");
             System.out.println("1 - Dijkstra");
             System.out.println("2 - Floyd-Warshall");
-            System.out.println("3 - Johnson's Algorithm");
+            System.out.println("3 - Bellman-Ford Algorithm");
             System.out.print("Enter choice: ");
             int choice = scanner.nextInt();
             String algorithm;
@@ -48,7 +48,7 @@ public class Main extends Application{
                     algorithm = "floyd-warshall";
                     break;
                 case 3:
-                    algorithm = "johnson";
+                    algorithm = "bellman-ford";
                     break;
                 default:
                     algorithm = "dijkstra";
