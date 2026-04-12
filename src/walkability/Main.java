@@ -1,5 +1,6 @@
 package walkability;
 
+import java.io.FileWriter;
 import java.util.Map;
 import java.util.Scanner;
 import javafx.application.Application;
@@ -65,6 +66,13 @@ public class Main extends Application{
 
             System.out.println("it is working");
 
+
+            //For temporary testing of making GeoJSON files
+            GeoResult geoResult = new GeoResult(graph, "data");
+            String geoJSON = geoResult.makeGeoJSON();
+            FileWriter writer = new FileWriter("data/output.geojson");
+            writer.write(geoJSON);
+            writer.close();
 
 
         } catch (Exception e) {
