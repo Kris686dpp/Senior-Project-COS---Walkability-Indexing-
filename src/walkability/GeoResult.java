@@ -49,4 +49,35 @@ public class GeoResult {
         return geoJOSN.toString();
 }
 
+    // Exporting it as a map
+    public void exportMap() throws Exception {
+        String geojson = makeGeoJSON();
+
+        java.nio.file.Files.writeString(
+                java.nio.file.Path.of("data/map.geojson"), geojson
+        );
+
+        String html = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>
+              <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>
+              <style> body { margin: 0; } #map { width: 100%; height: 100vh; } </style>
+            </head>
+            <body>
+            <div id='map'></div>
+                <script>
+                  var map = L.map('map').setView([42.01, 23.09], 13);
+                  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                </script>
+            </html>
+            """;
+
+        java.nio.file.Files.writeString(
+                java.nio.file.Path.of("data/map.html"), html
+        );
+
+        System.out.println("Map is exported");
+    }
 }

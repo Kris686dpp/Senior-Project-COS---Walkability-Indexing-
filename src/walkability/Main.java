@@ -17,10 +17,10 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-public class Main extends Application{
+public class Main {
 
     public static void main(String[] args) {
-        launch(args);
+        //launch(args);
         System.out.println("Average Distance Test");
 
         try {
@@ -64,22 +64,23 @@ public class Main extends Application{
 
             System.out.println("The radius of the graph is: " + radius + " meters");
 
-            System.out.println("it is working");
-
-
             //For temporary testing of making GeoJSON files
             GeoResult geoResult = new GeoResult(graph, "data");
             String geoJSON = geoResult.makeGeoJSON();
             FileWriter writer = new FileWriter("data/output.geojson");
             writer.write(geoJSON);
             writer.close();
+            System.out.println("The GeoJSON file has been created...");
+
+            //Exporting the map
+            geoResult.exportMap();
 
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    @Override
+   /* @Override
     public void start(Stage primaryStage) throws Exception {
 
         Group root = new Group();
@@ -88,5 +89,5 @@ public class Main extends Application{
 
         stage.setScene(scene);
         stage.show();
-    }
+    }*/
 }
