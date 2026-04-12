@@ -1,21 +1,16 @@
 package walkability;
 
-// To read XML files
 import javax.xml.stream.*;
-
-// To read files from a disc
 import java.io.FileInputStream;
 import java.io.InputStream;
-
 import java.util.*;
 
 public class OSMParser {
-    // Main parse method that will take osm file as input and output a Graph
     public Graph parse(String filePath) throws Exception {
 
-        Graph graph = new Graph(); // The final graph that is going to be returned
-
-        Map<Long, Node> osmNodes = new HashMap<>(); // Temporarily stores nodes by OSM id
+        Graph graph = new Graph();
+        Map<Long, Node> osmNodes = new HashMap<>(); // Temporarily stores all nodes by OSM id
+        Set<Long> roadNodes = new HashSet<>();
 
         XMLInputFactory factory = XMLInputFactory.newInstance();
         InputStream input = new FileInputStream(filePath);
@@ -40,7 +35,6 @@ public class OSMParser {
 
             // Checks if the reader is at the start of an xml tag
             if (event == XMLStreamConstants.START_ELEMENT) {
-                // Gets the name of the element
                 String elementName = reader.getLocalName();
 
                 // PARSING NODES - collect id, lat, lon but wait for tags before creating node
@@ -54,9 +48,8 @@ public class OSMParser {
 
                 // PARSING WAYS
                 else if (elementName.equals("way")) {
-                    insideNode = false; // we are no longer inside a node
+                    insideNode = false;
                     wayNodeRefs = new ArrayList<>();
-                    // isRoad is false until proven otherwise
                     isRoad = false;
                 }
 
@@ -92,14 +85,18 @@ public class OSMParser {
                     NodeType type = determineNodeType(currentNodeTags);
                     Node node = new Node(currentNodeId, currentLat, currentLon, type);
                     osmNodes.put(currentNodeId, node);
-                    graph.addNode(node);
                     insideNode = false;
                 }
 
-                // when the parser reaches </way> it knows that the current way is complete
+                // When way element closes
                 else if (elementName.equals("way") && wayNodeRefs != null) {
-                    // if the way is a road it connects the consecutive nodes
                     if (isRoad) {
+                        // Mark all nodes in this road way as road nodes
+                        for (Long ref : wayNodeRefs) {
+                            roadNodes.add(ref);
+                        }
+
+                        // Add edges between consecutive nodes
                         for (int i = 0; i < wayNodeRefs.size() - 1; i++) {
                             Node from = osmNodes.get(wayNodeRefs.get(i));
                             Node to = osmNodes.get(wayNodeRefs.get(i + 1));
@@ -122,6 +119,21 @@ public class OSMParser {
 
         reader.close();
         input.close();
+
+        // Adding the road nodes
+        for (Long id : roadNodes) {
+            Node node = osmNodes.get(id);
+            if (node != null) {
+                graph.addNode(node);
+            }
+        }
+
+        // Adding the amenity nodes
+        for (Node node : osmNodes.values()) {
+            if (node.getType() != NodeType.ROAD_NODE) {
+                graph.addNode(node);
+            }
+        }
 
         return graph;
     }

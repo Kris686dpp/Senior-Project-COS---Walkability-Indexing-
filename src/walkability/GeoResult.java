@@ -68,11 +68,22 @@ public class GeoResult {
             <body>
             <div id='map'></div>
                 <script>
-                  var map = L.map('map').setView([42.01, 23.09], 13);
+                  var map = L.map('map');
                   fetch('map.geojson')
                           .then(response => response.json())
                           .then(data => {
-                              L.geoJSON(data).addTo(map);
+                            var layer = L.geoJSON(data, {
+                                pointToLayer: function(feature, latlng) {
+                                    return L.circleMarker(latlng, {
+                                        radius: 2,
+                                        fillColor: "red",
+                                        color: "#000",
+                                        fillOpacity: 0.8,
+                                        weight: 0.2
+                                    });
+                                }
+                            }).addTo(map);   
+                            map.fitBounds(layer.getBounds());
                           })
                   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
                 </script>

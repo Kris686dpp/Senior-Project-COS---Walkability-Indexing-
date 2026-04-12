@@ -14,6 +14,8 @@ public class Graph {
 
     public void addEdge(Node from, Node to, double weight) {
         Edge edge = new Edge(from, to, weight);
+        adjacencyList.putIfAbsent(from, new ArrayList<>());
+        adjacencyList.putIfAbsent(to, new ArrayList<>());
         adjacencyList.get(from).add(edge);
 
         Edge reverseEdge = new Edge(to, from, weight);
