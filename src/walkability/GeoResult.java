@@ -56,7 +56,7 @@ public class GeoResult {
         java.nio.file.Files.writeString(
                 java.nio.file.Path.of("data/map.geojson"), geojson
         );
-
+        //
         String html = """
             <!DOCTYPE html>
             <html>
