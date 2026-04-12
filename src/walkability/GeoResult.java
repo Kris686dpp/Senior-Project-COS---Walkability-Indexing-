@@ -69,6 +69,11 @@ public class GeoResult {
             <div id='map'></div>
                 <script>
                   var map = L.map('map').setView([42.01, 23.09], 13);
+                  fetch('map.geojson')
+                          .then(response => response.json())
+                          .then(data => {
+                              L.geoJSON(data).addTo(map);
+                          })
                   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
                 </script>
             </html>
