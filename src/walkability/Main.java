@@ -85,13 +85,17 @@ public class Main {
                 else amenityNodes.add(node);
             }
 
-            for (int i=0; i<10; i++) {
-                Node testNode = roadNodes.get(i);
-                Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, testNode);
-                double score = WalkabilityAnalyzer.computeAmenityAcess(testNode, amenityNodes, distances);
-                System.out.println("Amenity score for node " + testNode.getId() + ": " + score);
-            }
 
+            double amenityScoreAverage = 0.0;
+            for (Node node : roadNodes) {
+                Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, node);
+                amenityScoreAverage += WalkabilityAnalyzer.computeAmenityAcess(node, amenityNodes, distances);
+            }
+            amenityScoreAverage /= roadNodes.size();
+            System.out.println("Acessabiltiy svore for the graph is: "+amenityScoreAverage);
+
+            double conncetivityScore = WalkabilityAnalyzer.computeConectivityScore(graph, "dijkstra");
+            System.out.println("Conenectivity score for the graph is: "+conncetivityScore);
 
 
         } catch (Exception e) {

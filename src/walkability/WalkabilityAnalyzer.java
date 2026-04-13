@@ -115,5 +115,9 @@ public class WalkabilityAnalyzer {
         default:   return 0.0;
         }
     }
+
+    public static double computeConectivityScore(Graph graph, String algorithm) throws Exception{
+        return (computeAverageDistance(graph, algorithm)/computeRadius(graph.getAllNodes()));
+    }
 }
 
