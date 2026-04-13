@@ -1,6 +1,8 @@
 package walkability;
 
 import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import javafx.application.Application;
@@ -74,6 +76,22 @@ public class Main {
 
             //Exporting the map
             geoResult.exportMap();
+
+            List<Node> roadNodes = new ArrayList<>();
+            List<Node> amenityNodes = new ArrayList<>();
+
+            for (Node node : graph.getAllNodes()) {
+                if (node.getType() == NodeType.ROAD_NODE) roadNodes.add(node);
+                else amenityNodes.add(node);
+            }
+
+            for (int i=0; i<10; i++) {
+                Node testNode = roadNodes.get(i);
+                Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, testNode);
+                double score = WalkabilityAnalyzer.computeAmenityAcess(testNode, amenityNodes, distances);
+                System.out.println("Amenity score for node " + testNode.getId() + ": " + score);
+            }
+
 
 
         } catch (Exception e) {

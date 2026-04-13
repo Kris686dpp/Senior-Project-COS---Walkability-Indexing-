@@ -9,7 +9,7 @@ public class OSMParser {
     public Graph parse(String filePath) throws Exception {
 
         Graph graph = new Graph();
-        Map<Long, Node> osmNodes = new HashMap<>(); // Temporarily stores all nodes by OSM id
+        Map<Long, Node> allNodes = new HashMap<>(); // Temporarily stores all nodes by OSM id
         Set<Long> roadNodes = new HashSet<>();
 
         XMLInputFactory factory = XMLInputFactory.newInstance();
@@ -84,7 +84,7 @@ public class OSMParser {
                 if (elementName.equals("node") && insideNode) {
                     NodeType type = determineNodeType(currentNodeTags);
                     Node node = new Node(currentNodeId, currentLat, currentLon, type);
-                    osmNodes.put(currentNodeId, node);
+                    allNodes.put(currentNodeId, node);
                     insideNode = false;
                 }
 
@@ -98,8 +98,8 @@ public class OSMParser {
 
                         // Add edges between consecutive nodes
                         for (int i = 0; i < wayNodeRefs.size() - 1; i++) {
-                            Node from = osmNodes.get(wayNodeRefs.get(i));
-                            Node to = osmNodes.get(wayNodeRefs.get(i + 1));
+                            Node from = allNodes.get(wayNodeRefs.get(i));
+                            Node to = allNodes.get(wayNodeRefs.get(i + 1));
 
                             if (from != null && to != null) {
                                 double distance = Utilities.haversine(
@@ -111,7 +111,7 @@ public class OSMParser {
                         }
                     }
 
-                    // reset only after the whole way is finished
+                    // Reset only after the whole way is finished
                     wayNodeRefs = null;
                 }
             }
@@ -122,16 +122,46 @@ public class OSMParser {
 
         // Adding the road nodes
         for (Long id : roadNodes) {
-            Node node = osmNodes.get(id);
+            Node node = allNodes.get(id);
             if (node != null) {
                 graph.addNode(node);
             }
         }
 
         // Adding the amenity nodes
-        for (Node node : osmNodes.values()) {
+        for (Node node : allNodes.values()) {
             if (node.getType() != NodeType.ROAD_NODE) {
                 graph.addNode(node);
+            }
+        }
+        // Connect each amenity node to its nearest road node
+        // Looping though all the nodes
+        for (Node amenity : allNodes.values()) {
+            //And checking for only amenity nodes
+            if (amenity.getType() == NodeType.ROAD_NODE) continue;
+
+            Node nearest = null;
+            double minDist = Double.POSITIVE_INFINITY;
+
+            // Looping through every road node
+            for (Long id : roadNodes) {
+                Node roadNode = allNodes.get(id);
+
+                // Calculating the straight line distance between the amenity and node
+                double amenityDist = Utilities.haversine(
+                        amenity.getLatitude(), amenity.getLongitude(),
+                        roadNode.getLatitude(), roadNode.getLongitude()
+                );
+                // If it is smaller than the minimum distance then it gets added as the nearest node
+                if (amenityDist < minDist) {
+                    minDist = amenityDist;
+                    nearest = roadNode;
+                }
+            }
+
+            // Adding the edge
+            if (nearest != null) {
+                graph.addEdge(amenity, nearest, minDist);
             }
         }
 

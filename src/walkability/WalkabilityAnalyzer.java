@@ -2,6 +2,8 @@ package walkability;
 
 import java.util.*;
 
+import static walkability.NodeType.*;
+
 public class WalkabilityAnalyzer {
 
     public static double computeAverageDistance(Graph graph, String algorithm) throws Exception {
@@ -87,4 +89,31 @@ public class WalkabilityAnalyzer {
         int index = (int) Math.ceil(0.95 * dist.size()) - 1;
         return dist.get(index);
     }
+
+    // Computing how accessible amenities are to a given node
+    public static double computeAmenityAcess(Node roadNode, List<Node> amenityNodes, Map<Node, Double> distances){
+        double score = 0.0;
+        double MAX_WALKING_DISTANCE = 1200.0;
+
+        for (Node amenity : amenityNodes){
+            double distance = distances.getOrDefault(amenity, Double.POSITIVE_INFINITY);
+            if (distance <= MAX_WALKING_DISTANCE) {
+                double amenityWeight = getAmenityWeight(amenity.getType());
+                double accessScore = 1.0 - (distance / MAX_WALKING_DISTANCE);
+                score += amenityWeight * accessScore;
+            }
+        }
+        return score;
+    }
+
+    // How important the different amenity types are
+    private static double getAmenityWeight(NodeType type){
+        switch (type) {
+        case TRANSIT: return 0.4;
+        case SHOP: return 0.5;
+        case PARK: return 0.1;
+        default:   return 0.0;
+        }
+    }
 }
+
