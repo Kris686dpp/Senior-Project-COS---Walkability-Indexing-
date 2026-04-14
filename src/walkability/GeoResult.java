@@ -87,9 +87,16 @@ public class GeoResult {
                                 if (score < 11)   return '#d77c27';
                                 if (score < 13)  return '#d79427';
                                 if (score < 17)  return '#d7a227';
-                                if (score < 21)  return '#d7b127';
-                                if (score < 23)  return '#d7bd27';
-                                if (score < 27)  return '#d7ce27';
+                                if (score < 25)  return '#d7b127';
+                                if (score < 50)  return '#d7c227';
+                                if (score < 75)  return '#d7d427';
+                                if (score < 100)  return '#d7bd27';
+                                if (score < 125)  return '#c8d727';
+                                if (score < 150)  return '#b7d727';
+                                if (score < 175)  return '#a2d727';
+                                if (score < 200)  return '#94d727';
+                                if (score < 200)  return '#88d727';
+                                if (score < 250)  return '#68d727';
                                 return '#1a9850';
                               }
                   var map = L.map('map');
@@ -98,13 +105,21 @@ public class GeoResult {
                           .then(data => {
                             var layer = L.geoJSON(data, {
                                 pointToLayer: function(feature, latlng) {
+                                    var isAmenity = feature.properties.type !== 'ROAD_NODE';
                                     return L.circleMarker(latlng, {
                                         radius: 2,
-                                        fillColor: getColor(feature.properties.score),
+                                        fillColor: isAmenity ? "#2a27d7" : getColor(feature.properties.score),
                                         color: "#000",
                                         fillOpacity: 0.8,
                                         weight: 0.2
                                     });
+                                },
+                                onEachFeature: function(feature, layer) {
+                                    layer.bindPopup(
+                                        'ID: ' + feature.properties.id + '<br>' +
+                                        'Type: ' + feature.properties.type + '<br>' +
+                                        'Score: ' + feature.properties.score.toFixed(2)
+                                    );
                                 }
                             }).addTo(map);   
                             map.fitBounds(layer.getBounds());
