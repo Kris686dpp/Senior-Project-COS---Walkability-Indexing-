@@ -2,15 +2,23 @@ package walkability;
 
 import java.io.FileWriter;
 import java.util.List;
+import java.util.Map;
 
 public class GeoResult {
 
     private Graph graph;
     private String output;
+    private Map<Node, Double> nodeScores;
 
     public GeoResult(Graph graph, String output){
         this.graph = graph;
         this.output = output;
+    }
+
+    public GeoResult(Graph graph, String output, Map<Node, Double> nodeScores){
+        this.graph = graph;
+        this.output = output;
+        this.nodeScores = nodeScores;
     }
 
     // Method for building .geojson files, result will be a string in geojson format
@@ -38,7 +46,8 @@ public class GeoResult {
             geoJOSN.append("\"geometry\": {\"type\": \"Point\", \"coordinates\": [").append(node.getLongitude()).append(",").append(node.getLatitude()).append("]},");
             geoJOSN.append("\"properties\": {");
             geoJOSN.append("\"id\": ").append(node.getId()).append(",");
-            geoJOSN.append("\"type\": \"").append(node.getType()).append("\"");
+            geoJOSN.append("\"type\": \"").append(node.getType()).append("\",");
+            geoJOSN.append("\"score\": ").append(nodeScores.getOrDefault(node, 0.0));
             geoJOSN.append("}}");
 
             // If it is not the last node add a comma
@@ -68,6 +77,21 @@ public class GeoResult {
             <body>
             <div id='map'></div>
                 <script>
+                function getColor(score) {
+                                if (score <= 0)   return '#d73027';
+                                if (score < 1)  return '#d74427';
+                                if (score < 2)  return '#d74d27';
+                                if (score < 3)  return '#d75627';
+                                if (score < 5)  return '#d76227';
+                                if (score < 7)  return '#d76d27';
+                                if (score < 11)   return '#d77c27';
+                                if (score < 13)  return '#d79427';
+                                if (score < 17)  return '#d7a227';
+                                if (score < 21)  return '#d7b127';
+                                if (score < 23)  return '#d7bd27';
+                                if (score < 27)  return '#d7ce27';
+                                return '#1a9850';
+                              }
                   var map = L.map('map');
                   fetch('map.geojson')
                           .then(response => response.json())
@@ -76,7 +100,7 @@ public class GeoResult {
                                 pointToLayer: function(feature, latlng) {
                                     return L.circleMarker(latlng, {
                                         radius: 2,
-                                        fillColor: "red",
+                                        fillColor: getColor(feature.properties.score),
                                         color: "#000",
                                         fillOpacity: 0.8,
                                         weight: 0.2

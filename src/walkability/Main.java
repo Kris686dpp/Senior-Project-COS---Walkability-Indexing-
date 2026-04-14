@@ -1,23 +1,6 @@
 package walkability;
 
-import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import javafx.application.Application;
-import javafx.stage.Stage;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Polygon;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+import java.util.*;
 
 public class Main {
 
@@ -66,16 +49,8 @@ public class Main {
 
             System.out.println("The radius of the graph is: " + radius + " meters");
 
-            //For temporary testing of making GeoJSON files
-            GeoResult geoResult = new GeoResult(graph, "data");
-            String geoJSON = geoResult.makeGeoJSON();
-            FileWriter writer = new FileWriter("data/output.geojson");
-            writer.write(geoJSON);
-            writer.close();
-            System.out.println("The GeoJSON file has been created...");
 
-            //Exporting the map
-            geoResult.exportMap();
+
 
             List<Node> roadNodes = new ArrayList<>();
             List<Node> amenityNodes = new ArrayList<>();
@@ -85,17 +60,24 @@ public class Main {
                 else amenityNodes.add(node);
             }
 
-
+            Map<Node, Double> nodeScores = new HashMap<>();
             double amenityScoreAverage = 0.0;
             for (Node node : roadNodes) {
                 Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, node);
-                amenityScoreAverage += WalkabilityAnalyzer.computeAmenityAcess(node, amenityNodes, distances);
+                double score =  WalkabilityAnalyzer.computeAmenityAccess(node, amenityNodes, distances);
+                amenityScoreAverage += score;
+                nodeScores.put(node, score);
             }
-            amenityScoreAverage /= roadNodes.size();
-            System.out.println("Acessabiltiy svore for the graph is: "+amenityScoreAverage);
 
-            double conncetivityScore = WalkabilityAnalyzer.computeConectivityScore(graph, "dijkstra");
-            System.out.println("Conenectivity score for the graph is: "+conncetivityScore);
+            // Making the GeoJSON file
+            GeoResult geoResult = new GeoResult(graph, "data", nodeScores);
+            String geoJSON = geoResult.makeGeoJSON();
+
+            //Exporting the map
+            geoResult.exportMap();
+
+            amenityScoreAverage /= roadNodes.size();
+            System.out.println("Accessabiltiy score for the graph is: "+amenityScoreAverage);
 
 
         } catch (Exception e) {
