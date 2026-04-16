@@ -4,7 +4,7 @@ import java.util.*;
 
 public class WalkabilityAnalyzer {
 
-    public static double computeAverageDistance(Graph graph, String algorithm) throws Exception {
+    public static Result computeAverageDistance(Graph graph, String algorithm, List<Node> amenityNodes) throws Exception {
 
         List<Node> nodes = new ArrayList<>(graph.getAllNodes());
         int n = nodes.size();
@@ -17,9 +17,10 @@ public class WalkabilityAnalyzer {
         // For calculating the average: dividing the total distance by the number of all reachable nodes
         double totalDistance = 0.0;
         int reachablePairs = 0;
+        // For all the accessability scores for the nodes.
+        Map<Node, Double> nodeScores = new HashMap<>();
 
-        // Computing average distance for FLOYD-WARSHALL
-
+        // Computing FLOYD-WARSHALL
         if (algorithm.equals("floyd-warshall")) {
             FloydWarshall.Result result = FloydWarshall.computeAllPairs(graph);
             double[][] dist = result.dist;
@@ -32,40 +33,61 @@ public class WalkabilityAnalyzer {
                     }
                 }
             }
+        }
 
-        // Computing average distance for BELLMAN-FORD
-
-        } else if (algorithm.equals("bellman-ford")) {
+        // Computing BELLMAN-FORD
+        else if (algorithm.equals("bellman-ford")) {
             for (Node source : nodes) {
                 Map<Node, Double> distances = BellmanFord.computeShortestPath(graph, source);
+
+                // Computing average distance
                 for (Map.Entry<Node, Double> entry : distances.entrySet()) {
                     if (entry.getKey() != source && entry.getValue() != Double.POSITIVE_INFINITY) {
                         totalDistance += entry.getValue();
                         reachablePairs++;
                     }
                 }
-            }
-        } else {
-            // Default to DIJKSTRA
-            for (Node source : nodes) {
-                Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, source);
-                for (Map.Entry<Node, Double> entry : distances.entrySet()) {
-                    if (entry.getKey() != source && entry.getValue() != Double.POSITIVE_INFINITY) {
-                        totalDistance += entry.getValue();
-                        reachablePairs++;
-                    }
-                }
+
+                // Computing the amenity score
+                double score = computeAmenityAccess(amenityNodes, distances);
+                nodeScores.put(source, score);
             }
         }
 
-        long timeTaken = System.currentTimeMillis() - startTime;
-        System.out.println("Time taken: " + (String.format("%.2f", timeTaken / 1000.0) + "s"));
+        // Default to DIJKSTRA
+        else {
+            for (Node source : nodes) {
+
+                Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, source);
+
+                // Computing average distance
+                for (Map.Entry<Node, Double> entry : distances.entrySet()) {
+                    if (entry.getKey() != source && entry.getValue() != Double.POSITIVE_INFINITY) {
+                        totalDistance += entry.getValue();
+                        reachablePairs++;
+                    }
+                }
+
+                // Computing the amenity score
+                double score = computeAmenityAccess(amenityNodes, distances);
+                nodeScores.put(source, score);
+            }
+        }
+
 
         if (reachablePairs == 0) {
             throw new IllegalStateException("No reachable node pairs found in graph.");
         }
 
-        return totalDistance / reachablePairs;
+        // Result of the timer
+        {
+            long timeTaken = System.currentTimeMillis() - startTime;
+            System.out.println("Time taken: " + (String.format("%.2f", timeTaken / 1000.0) + "s"));
+        }
+
+        // Result
+        double averageDistance = totalDistance / reachablePairs;
+        return new Result(averageDistance, nodeScores);
     }
 
     public static double computeRadius(List <Node> nodes){
@@ -89,9 +111,9 @@ public class WalkabilityAnalyzer {
     }
 
     // Computing how accessible amenities are to a given node
-    public static double computeAmenityAccess(Node roadNode, List<Node> amenityNodes, Map<Node, Double> distances){
+    public static double computeAmenityAccess(List<Node> amenityNodes, Map<Node, Double> distances){
         double score = 0.0;
-        double MAX_WALKING_DISTANCE = 1200.0;
+        final double MAX_WALKING_DISTANCE = 1200.0;
 
         for (Node amenity : amenityNodes){
             double distance = distances.getOrDefault(amenity, Double.POSITIVE_INFINITY);
@@ -111,6 +133,15 @@ public class WalkabilityAnalyzer {
         case SHOP: return 0.5;
         case PARK: return 0.1;
         default:   return 0.0;
+        }
+    }
+
+    public static class Result{
+        public final double averageDistance;
+        public final Map<Node, Double> accessabilityScore;
+        public Result(double averageDistance, Map<Node, Double> accessabilityScore){
+            this.accessabilityScore = accessabilityScore;
+            this.averageDistance = averageDistance;
         }
     }
 
