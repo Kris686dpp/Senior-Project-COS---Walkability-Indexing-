@@ -112,11 +112,9 @@ public class WalkabilityTest {
         graph.addEdge(a, b, 6.7);
 
         FloydWarshall.Result result = FloydWarshall.computeAllPairs(graph);
-        double[][] dist = result.dist;
+        double[][] dist = result.distances;
         assertEquals("The direct edge between a and b should be 6.7", 6.7, dist[0][1], 0.001);
         assertEquals("The reverse edge, b to a, should also be 6.7", 6.7, dist[1][0], 0.001);
-
-
     }
 
     @Test
@@ -132,7 +130,7 @@ public class WalkabilityTest {
         graph.addEdge(b, c, 20.0);
 
         FloydWarshall.Result result = FloydWarshall.computeAllPairs(graph);
-        double[][] dist = result.dist;
+        double[][] dist = result.distances;
         assertEquals("A to C by B should be 30.0", 30.0, dist[0][2], 0.001);
         assertEquals("C to  A by B should be 30.0", 30.0, dist[2][0], 0.001);
     }

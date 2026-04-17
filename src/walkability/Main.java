@@ -40,17 +40,6 @@ public class Main {
                     algorithm = "dijkstra";
                     break;
             }
-            double avgDistance = WalkabilityAnalyzer.computeAverageDistance(graph, algorithm);
-
-            System.out.println("Average distance between all reachable nodes: "
-                    + avgDistance + " meters");
-
-            double radius = WalkabilityAnalyzer.computeRadius(graph.getAllNodes());
-
-            System.out.println("The radius of the graph is: " + radius + " meters");
-
-
-
 
             List<Node> roadNodes = new ArrayList<>();
             List<Node> amenityNodes = new ArrayList<>();
@@ -60,38 +49,29 @@ public class Main {
                 else amenityNodes.add(node);
             }
 
-            Map<Node, Double> nodeScores = new HashMap<>();
-            double amenityScoreAverage = 0.0;
-            for (Node node : roadNodes) {
-                Map<Node, Double> distances = Dijkstra.computeShortestPaths(graph, node);
-                double score =  WalkabilityAnalyzer.computeAmenityAccess(node, amenityNodes, distances);
-                amenityScoreAverage += score;
-                nodeScores.put(node, score);
+            WalkabilityAnalyzer.Result result = WalkabilityAnalyzer.computeAverageDistance(graph, algorithm, amenityNodes);
+            double radius = WalkabilityAnalyzer.computeRadius(graph.getAllNodes());
+            double totalAccessibility = 0.0;
+            for (double score : result.accessabilityScores.values()) {
+                totalAccessibility += score;
             }
+            double averageAccessibility = totalAccessibility / result.accessabilityScores.size();
+
+
+            System.out.println("Average distance between all reachable nodes: "
+                    + result.averageDistance + " meters");
+            System.out.println("The radius of the graph is: " + radius + " meters");
+            System.out.println("The average accessibility score: " + String.format("%.2f", averageAccessibility));
 
             // Making the GeoJSON file
-            GeoResult geoResult = new GeoResult(graph, "data", nodeScores);
+            GeoResult geoResult = new GeoResult(graph, "data", result.accessabilityScores);
             String geoJSON = geoResult.makeGeoJSON();
 
             //Exporting the map
             geoResult.exportMap();
 
-            amenityScoreAverage /= roadNodes.size();
-            System.out.println("Accessabiltiy score for the graph is: "+amenityScoreAverage);
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-   /* @Override
-    public void start(Stage primaryStage) throws Exception {
-
-        Group root = new Group();
-        Scene scene = new Scene(root, 600,600);
-        Stage stage = new Stage();
-
-        stage.setScene(scene);
-        stage.show();
-    }*/
 }

@@ -23,7 +23,8 @@ public class WalkabilityAnalyzer {
         // Computing FLOYD-WARSHALL
         if (algorithm.equals("floyd-warshall")) {
             FloydWarshall.Result result = FloydWarshall.computeAllPairs(graph);
-            double[][] dist = result.dist;
+            double[][] dist = result.distances;
+            Map<Node, Integer> indexMap = result.indexMap;
 
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
@@ -32,7 +33,11 @@ public class WalkabilityAnalyzer {
                         reachablePairs++;
                     }
                 }
+                double score = computeAmenityAccessFW(amenityNodes, dist, i, indexMap);
+                nodeScores.put(nodes.get(i), score);
             }
+
+
         }
 
         // Computing BELLMAN-FORD
@@ -126,6 +131,23 @@ public class WalkabilityAnalyzer {
         return score;
     }
 
+    // Computing how accessible amenities are to a given node (For Floyd-warshall)
+    public static double computeAmenityAccessFW(List<Node> amenityNodes, double[][] distances, int index, Map<Node, Integer> indexMap){
+        double score = 0.0;
+        final double MAX_WALKING_DISTANCE = 1200.0;
+
+        for (Node amenity : amenityNodes){
+            int i = indexMap.get(amenity);
+            double distance = distances[index][i];
+            if (distance <= MAX_WALKING_DISTANCE) {
+                double amenityWeight = getAmenityWeight(amenity.getType());
+                double accessScore = ((1 - distance / MAX_WALKING_DISTANCE)*10);
+                score += amenityWeight * accessScore;
+            }
+        }
+        return score;
+    }
+
     // How important the different amenity types are
     private static double getAmenityWeight(NodeType type){
         switch (type) {
@@ -138,9 +160,9 @@ public class WalkabilityAnalyzer {
 
     public static class Result{
         public final double averageDistance;
-        public final Map<Node, Double> accessabilityScore;
-        public Result(double averageDistance, Map<Node, Double> accessabilityScore){
-            this.accessabilityScore = accessabilityScore;
+        public final Map<Node, Double> accessabilityScores;
+        public Result(double averageDistance, Map<Node, Double> accessabilityScores){
+            this.accessabilityScores = accessabilityScores;
             this.averageDistance = averageDistance;
         }
     }

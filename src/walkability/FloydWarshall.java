@@ -5,11 +5,11 @@ import java.util.*;
 public class FloydWarshall {
 
     public static class Result {
-        public final double[][] dist;
+        public final double[][] distances;
         public final Map<Node, Integer> indexMap;
 
         public Result(double[][] dist, Map<Node, Integer> indexMap) {
-            this.dist = dist;
+            this.distances = dist;
             this.indexMap = indexMap;
         }
     }
